@@ -1,15 +1,12 @@
-// Builds the fully on-chain token URI for the "42 Genesis Blocks (On-chain)"
-// token: metadata JSON and image packed into data: URIs, no IPFS.
+// Builds the token uri for the on-chain NFT:
+// the metadata and the image are put directly in the uri, no IPFS.
 import { readFileSync } from "node:fs";
 import path from "node:path";
 
 export const ON_CHAIN_SVG_PATH = path.join(import.meta.dirname, "..", "code", "art", "tokenize-art-42-onchain.svg");
 
-/**
- * The SVG goes in as UTF-8 (only "#" needs escaping: it would otherwise
- * start a URL fragment), which is ~25% smaller than base64. The JSON is
- * base64-encoded, the format wallets expect.
- */
+// the svg is kept as text (smaller than base64), we only replace "#" with %23
+// the json is in base64 because that's what wallets expect
 export function buildOnChainTokenUri(svgSource = readFileSync(ON_CHAIN_SVG_PATH, "utf8")): string {
   if (svgSource.includes("%") || svgSource.includes('"')) {
     throw new Error('The on-chain SVG must not contain "%" or double quotes.');

@@ -1,8 +1,7 @@
-// Creates a fresh test-only wallet and writes code/.env (git-ignored, readable
-// only by you) with its private key, its address, and the BSC Testnet RPC URL.
-// Prints only the public address, so the key never has to be copied by hand.
+// Creates a new wallet just for testing and saves it in code/.env.
+// Only the address is printed, the private key stays in the file.
 //
-// Usage: npm run create-wallet
+// npm run create-wallet
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Wallet } from "ethers";

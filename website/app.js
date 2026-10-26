@@ -1,14 +1,13 @@
-// Minting website for the TokenizeArt42 contract (bonus part).
+// Minting website (bonus).
 //
-// Reading (collection info, gallery) uses a public RPC and works without a
-// wallet. Minting is signed by the visitor's own wallet (MetaMask); this page
-// never handles a private key. The contract only lets its owner mint, so the
-// form is enabled only when the connected account is the owner.
+// Reading the contract and the gallery works without a wallet.
+// To mint you connect MetaMask, the page never sees a private key.
+// Only the owner can mint, so the form is locked for other wallets.
 "use strict";
 
 const { ethers } = window;
 
-// Only the contract functions, events and errors this page uses.
+// what we use from the contract
 const TOKENIZE_ART_ABI = [
   "function name() view returns (string)",
   "function symbol() view returns (string)",
@@ -23,7 +22,7 @@ const TOKENIZE_ART_ABI = [
   "error ERC721InvalidReceiver(address receiver)",
 ];
 
-// Plain-language explanations for the contract's custom errors.
+// readable messages for the contract errors
 const CONTRACT_ERROR_MESSAGES = {
   EmptyMetadataURI: "The metadata URI is empty.",
   OwnableUnauthorizedAccount: "Only the contract owner can mint.",
@@ -61,7 +60,7 @@ const elements = {
   gallery: document.getElementById("gallery"),
 };
 
-/** Shortens 0x1234…abcd for display. */
+// 0x1234…abcd
 function shortenAddress(address) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
@@ -70,7 +69,7 @@ function sameAddress(first, second) {
   return Boolean(first && second) && first.toLowerCase() === second.toLowerCase();
 }
 
-/** Turns ipfs://CID into a gateway URL. Other schemes are refused. */
+// ipfs://CID → gateway link (anything else → null)
 function ipfsToGatewayUrl(uri) {
   if (typeof uri !== "string" || !uri.startsWith("ipfs://")) {
     return null;
@@ -78,10 +77,8 @@ function ipfsToGatewayUrl(uri) {
   return `${siteConfig.ipfsGatewayUrl}/${uri.slice("ipfs://".length)}`;
 }
 
-/**
- * Image source for an NFT: IPFS through the gateway, or an on-chain SVG/PNG
- * data: URI used as-is (images in <img> cannot run scripts).
- */
+// image link: ipfs → gateway, on-chain svg/png → used directly
+// (an svg inside <img> can't run scripts)
 function imageUriToSource(uri) {
   if (typeof uri === "string" && /^data:image\/(svg\+xml|png)[;,]/.test(uri)) {
     return uri;
@@ -89,7 +86,7 @@ function imageUriToSource(uri) {
   return ipfsToGatewayUrl(uri);
 }
 
-/** Decodes an on-chain data:application/json URI (base64 or URL-encoded). */
+// decodes on-chain json (data:application/json...)
 function decodeJsonDataUri(dataUri) {
   const match = /^data:application\/json(;[^,]*)?,(.*)$/s.exec(dataUri);
   if (!match) {
@@ -125,7 +122,7 @@ function setStatus(element, message, kind = "") {
   element.classList.toggle("is-error", kind === "error");
 }
 
-/** Extracts a readable message from wallet, RPC and contract errors. */
+// turns wallet / contract errors into a simple message
 function describeError(error) {
   if (error?.code === "ACTION_REJECTED" || error?.code === 4001) {
     return "You rejected the request in your wallet.";
@@ -145,7 +142,7 @@ function explorerTransactionUrl(transactionHash) {
   return `${siteConfig.explorerUrl}/tx/${transactionHash}`;
 }
 
-// ---------------------------------------------------------------- reading
+// ---- read the contract ----
 
 async function loadContractInfo() {
   const [collectionName, collectionSymbol, ownerAddress, mintedCount] = await Promise.all([
@@ -237,14 +234,14 @@ async function refreshFromChain() {
   }
 }
 
-// ----------------------------------------------------------------- wallet
+// ---- wallet ----
 
 async function switchWalletToSiteChain() {
   const chainIdHex = ethers.toQuantity(siteConfig.chainId);
   try {
     await window.ethereum.request({ method: "wallet_switchEthereumChain", params: [{ chainId: chainIdHex }] });
   } catch (error) {
-    // 4902: the wallet does not know this chain yet, so add it.
+    // 4902 = metamask doesn't know this network yet, so we add it
     if (error?.code !== 4902) {
       throw error;
     }
@@ -297,7 +294,7 @@ function disconnectWalletState() {
   updateMintPermission();
 }
 
-/** Enables the mint form only for the contract owner, and explains why otherwise. */
+// only the owner can use the mint form
 function updateMintPermission() {
   const isOwner = sameAddress(connectedAddress, contractOwnerAddress);
   let permissionMessage;
@@ -314,11 +311,11 @@ function updateMintPermission() {
   elements.mintButton.disabled = !isOwner;
 }
 
-// ---------------------------------------------------------------- minting
+// ---- mint ----
 
 let previewRequestNumber = 0;
 
-/** Shows the name and image of the metadata about to be minted. */
+// shows the name and image before minting
 async function previewMetadata() {
   const requestNumber = ++previewRequestNumber;
   const metadataUri = elements.metadataInput.value.trim();
@@ -364,7 +361,7 @@ async function mintToken(event) {
 
   elements.mintButton.disabled = true;
   try {
-    // Re-check the wallet network right before signing.
+    // make sure we're still on the right network
     const walletNetwork = await walletSigner.provider.getNetwork();
     if (walletNetwork.chainId !== BigInt(siteConfig.chainId)) {
       await switchWalletToSiteChain();
@@ -373,7 +370,7 @@ async function mintToken(event) {
 
     const writeContract = new ethers.Contract(siteConfig.contractAddress, TOKENIZE_ART_ABI, walletSigner);
 
-    // Simulate first: a failing mint is reported without spending gas.
+    // test the mint first, so an error doesn't cost gas
     setStatus(elements.mintStatus, "Checking the mint…");
     await writeContract.safeMint.staticCall(recipientAddress, metadataUri);
 
@@ -407,7 +404,7 @@ async function mintToken(event) {
   }
 }
 
-// ------------------------------------------------------------------- start
+// ---- start ----
 
 async function initialize() {
   siteConfig = await (await fetch("/config.json")).json();

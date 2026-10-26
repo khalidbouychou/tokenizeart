@@ -1,10 +1,9 @@
-// Deploys the TokenizeArt42 contract and records the result in
-// deployment/<network>.json (committed: the PRD requires the contract
-// address and network to be in the repository).
+// Deploys the contract and saves the address in deployment/<network>.json
+// (the subject wants the address and network in the repo).
 //
-// Usage (from code/):
+// from code/:
 //   npm run deploy           → BSC Testnet
-//   npm run deploy:local     → local simulated chain (dry run, nothing saved)
+//   npm run deploy:local     → local test only, nothing saved
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { network } from "hardhat";
@@ -19,13 +18,13 @@ const { chainId } = await ethers.provider.getNetwork();
 const isBscTestnet = chainId === BSC_TESTNET_CHAIN_ID;
 const deploymentRecordPath = path.join(import.meta.dirname, `${networkName}.json`);
 
-// Safety: never touch a live chain other than BSC Testnet (no real funds).
+// only testnet (or local), never a real chain
 const isLocalSimulatedChain = chainId === 31337n;
 if (!isBscTestnet && !isLocalSimulatedChain) {
   throw new Error(`Refusing to deploy to chain ID ${chainId}: only BSC Testnet (97) is allowed.`);
 }
 
-// Avoid deploying a second copy by accident; delete the record to redeploy.
+// already deployed? stop here (delete the json file to deploy again)
 if (isBscTestnet && existsSync(deploymentRecordPath)) {
   throw new Error(`${deploymentRecordPath} already exists: the contract is already deployed.`);
 }
@@ -35,7 +34,7 @@ const deployerAddress = await deployerSigner.getAddress();
 
 console.log(`Deploying TokenizeArt42 ("${COLLECTION_NAME}", ${COLLECTION_SYMBOL}) to ${networkName} (chain ID ${chainId})...`);
 
-// The deployer becomes the contract owner, the only account allowed to mint.
+// our wallet becomes the owner = the only one who can mint
 const tokenizeArt = await ethers.deployContract("TokenizeArt42", [
   COLLECTION_NAME,
   COLLECTION_SYMBOL,
@@ -49,7 +48,7 @@ const contractAddress = await tokenizeArt.getAddress();
 console.log(`Contract address: ${contractAddress}`);
 console.log(`Transaction:      ${deploymentTransaction?.hash}`);
 
-// Sanity check the live contract before recording it.
+// quick check that the owner is really us
 const onChainOwner = await tokenizeArt.owner();
 if (onChainOwner !== deployerAddress) {
   throw new Error(`Unexpected owner ${onChainOwner}; expected the deployer.`);

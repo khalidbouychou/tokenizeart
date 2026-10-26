@@ -1,16 +1,15 @@
-// Mints the "42 Genesis Blocks" NFT on the deployed TokenizeArt42 contract
-// and records the result in deployment/bscTestnet-mint.json (committed).
+// Mints the "42 Genesis Blocks" NFT and saves the result in
+// deployment/bscTestnet-mint.json.
 //
-// The token goes to the contract owner (the deployer wallet) and points to
-// the metadata JSON uploaded to IPFS in Feat 3.
+// The NFT goes to our wallet and points to the metadata on IPFS.
 //
-// Usage (from code/): npm run mint
+// from code/: npm run mint
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { network } from "hardhat";
 import deploymentRecord from "./bscTestnet.json" with { type: "json" };
 
-// IPFS URI of code/art/tokenize-art-42.json (name, artist, image).
+// ipfs link of code/art/tokenize-art-42.json
 const METADATA_URI = "ipfs://bafkreiec7ypupjglneppqu2jfhajmzhmfcr7xehukubdtslamrfki4tfum";
 const BSC_TESTNET_CHAIN_ID = 97n;
 const BSC_TESTNET_EXPLORER_URL = "https://testnet.bscscan.com";
@@ -28,9 +27,8 @@ if (existsSync(mintRecordPath)) {
 
 const tokenizeArt = await ethers.getContractAt("TokenizeArt42", deploymentRecord.contractAddress);
 
-// On-chain guard: this project mints a single NFT. Checking the contract
-// (not just the local record) prevents a second mint if a previous run sent
-// the transaction but crashed before saving the record.
+// we only want one NFT here, so stop if the contract already has one
+// (in case a previous run crashed before saving the json)
 const alreadyMintedCount = await tokenizeArt.totalMinted();
 if (alreadyMintedCount > 0n) {
   throw new Error(`The contract already has ${alreadyMintedCount} minted token(s); not minting again.`);
@@ -43,7 +41,7 @@ console.log(`Minting on ${deploymentRecord.contractAddress} with metadata ${META
 const mintTransaction = await tokenizeArt.safeMint(recipientAddress, METADATA_URI);
 const mintReceipt = await mintTransaction.wait();
 
-// Read the token ID from the ERC-721 Transfer event emitted by the mint.
+// get the token id from the Transfer event
 const transferEvent = mintReceipt?.logs
   .map((log) => tokenizeArt.interface.parseLog(log))
   .find((parsedLog) => parsedLog?.name === "Transfer");
@@ -52,7 +50,7 @@ if (!transferEvent) {
 }
 const mintedTokenId: bigint = transferEvent.args.tokenId;
 
-// Read back from the chain to confirm ownership and metadata.
+// check on the chain that the owner and the link are correct
 const onChainOwner = await tokenizeArt.ownerOf(mintedTokenId);
 const onChainTokenUri = await tokenizeArt.tokenURI(mintedTokenId);
 if (onChainOwner !== recipientAddress || onChainTokenUri !== METADATA_URI) {

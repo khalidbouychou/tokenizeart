@@ -1,20 +1,17 @@
-// Hardhat configuration: Solidity compiler settings, the local test chain,
-// and BSC Testnet (the only live network; BSC mainnet is deliberately absent
-// so real funds can never be used).
+// Hardhat config: compiler, local test chain and BSC Testnet.
+// No mainnet here on purpose, we never use real money.
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { configVariable, defineConfig } from "hardhat/config";
 
-// Load secrets and account-specific values (key, RPC URL, address) from the
-// git-ignored code/.env into process.env. See .env.example for the list.
+// load the private key, RPC url etc. from code/.env (not in git)
 const envFilePath = path.join(import.meta.dirname, ".env");
 if (existsSync(envFilePath)) {
   process.loadEnvFile(envFilePath);
 }
 
-// Pinning the chain ID makes Hardhat refuse to send transactions if the RPC
-// URL in .env ever points at a different network (e.g. BSC mainnet, ID 56).
+// if the RPC url points to another chain (like mainnet = 56), hardhat stops
 const BSC_TESTNET_CHAIN_ID = 97;
 
 export default defineConfig({
@@ -26,19 +23,17 @@ export default defineConfig({
     },
   },
   networks: {
-    // Local simulated chain used by `npm test`.
+    // local fake chain for the tests
     hardhatMainnet: {
       type: "edr-simulated",
       chainType: "l1",
     },
-    // Test network only: the PRD forbids real funds, so BSC mainnet is
-    // deliberately not configured.
+    // the only real network we use (testnet, free tBNB)
     bscTestnet: {
       type: "http",
       chainType: "l1",
       chainId: BSC_TESTNET_CHAIN_ID,
-      // Both resolved at run time from code/.env (git-ignored) or the
-      // environment. Never written to this file.
+      // read from .env, never written here
       url: configVariable("BSC_TESTNET_RPC_URL"),
       accounts: [configVariable("BSC_TESTNET_PRIVATE_KEY")],
     },

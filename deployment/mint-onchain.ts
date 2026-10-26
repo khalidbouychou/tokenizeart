@@ -1,15 +1,12 @@
-// Bonus: mints a "42 Genesis Blocks" token whose metadata AND image are
-// stored entirely on-chain, with no IPFS involved.
+// Bonus: mints an NFT where the metadata AND the image are stored on-chain.
 //
-// The existing contract accepts any metadata URI, so the token URI here is a
-// data: URI holding the whole metadata JSON (base64), whose "image" is itself
-// a data: URI holding the compact SVG (code/art/tokenize-art-42-onchain.svg,
-// ~1.5 KB); see onchain-metadata.ts. tokenURI() then returns everything
-// straight from contract storage.
+// Our contract accepts any uri, so instead of an ipfs:// link we give it a
+// data: uri that contains everything (see onchain-metadata.ts).
+// tokenURI() then gives back everything directly from the contract.
 //
-// Usage (from code/):
-//   npm run mint-onchain             → estimate gas and cost only (sends nothing)
-//   MINT=yes npm run mint-onchain    → mint, then record the result in
+// from code/:
+//   npm run mint-onchain             → only shows the gas and the price
+//   MINT=yes npm run mint-onchain    → really mints and saves
 //                                      deployment/bscTestnet-mint-onchain.json
 import { existsSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -19,7 +16,7 @@ import { buildOnChainTokenUri } from "./onchain-metadata.ts";
 
 const BSC_TESTNET_CHAIN_ID = 97n;
 const BSC_TESTNET_EXPLORER_URL = "https://testnet.bscscan.com";
-// Require 20% more balance than the estimate, since gas prices can move.
+// ask for 20% more than the estimate, gas price can change
 const BALANCE_SAFETY_MARGIN_PERCENT = 120n;
 
 const mintRecordPath = path.join(import.meta.dirname, "bscTestnet-mint-onchain.json");
@@ -38,8 +35,7 @@ const [ownerSigner] = await ethers.getSigners();
 const ownerAddress = await ownerSigner.getAddress();
 const onChainTokenUri = buildOnChainTokenUri();
 
-// On-chain guard: never mint a second copy if an earlier run sent the
-// transaction but crashed before saving the record.
+// don't mint it twice (in case a previous run crashed before saving)
 const mintedCount = await tokenizeArt.totalMinted();
 for (let existingTokenId = 0n; existingTokenId < mintedCount; existingTokenId++) {
   if ((await tokenizeArt.tokenURI(existingTokenId)) === onChainTokenUri) {
@@ -84,7 +80,7 @@ if (!transferEvent) {
 }
 const mintedTokenId: bigint = transferEvent.args.tokenId;
 
-// Read back: the stored URI must match byte for byte.
+// check that the chain saved exactly what we sent
 if ((await tokenizeArt.tokenURI(mintedTokenId)) !== onChainTokenUri) {
   throw new Error("tokenURI read back from the chain does not match what was minted.");
 }

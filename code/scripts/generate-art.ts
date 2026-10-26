@@ -1,15 +1,15 @@
-// Generates the TokenizeArt NFT image: the number 42 built from gold blocks
-// on a dark block grid (a nod to blockchain blocks and BNB Chain's gold).
+// Draws the NFT image: "42" made of gold blocks on a dark grid
+// (blocks like a blockchain, gold like BNB Chain).
 //
-// The artwork uses no fonts: each digit is a hand-drawn bitmap, so "42"
-// renders identically everywhere and stays legible at thumbnail size.
+// No font is used, each digit is drawn block by block,
+// so the 42 looks the same everywhere and is easy to read even small.
 //
-// Outputs (in code/art/):
-//   tokenize-art-42.svg          source artwork
-//   tokenize-art-42.png          2000x2000 render, the file uploaded to IPFS
-//   tokenize-art-42-onchain.svg  same artwork in ~1.5 KB, stored on-chain
+// Files created in code/art/:
+//   tokenize-art-42.svg          the drawing
+//   tokenize-art-42.png          2000x2000 image, the one on IPFS
+//   tokenize-art-42-onchain.svg  small version (~1.5 KB) stored on-chain
 //
-// Usage: npm run generate-art
+// npm run generate-art
 import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -21,8 +21,7 @@ const BLOCK_INSET_PX = 3;
 const BLOCK_CORNER_RADIUS_PX = 6;
 const PNG_SIZE_PX = 2000;
 
-// Digit bitmaps, 8 columns x 11 rows, with strokes two cells thick.
-// "#" is a gold block, "." is empty.
+// each digit is 8 x 11 cells, "#" = gold block, "." = empty
 const DIGIT_FOUR = [
   ".....##.",
   "....###.",
@@ -37,8 +36,7 @@ const DIGIT_FOUR = [
   ".....##.",
 ];
 
-// Rounded top and a vertical right side before the diagonal, so the 2 is not
-// mistaken for a Z at thumbnail size.
+// round top so the 2 doesn't look like a Z when small
 const DIGIT_TWO = [
   "..####..",
   ".######.",
@@ -53,9 +51,7 @@ const DIGIT_TWO = [
   "########",
 ];
 
-// Layout in grid cells: two 8-column digits with a 3-column gap give 19
-// columns, centered with 3 empty columns on each side. 11 rows tall,
-// centered with 7 empty rows above and below.
+// position of the 42 in the 25x25 grid (centered)
 const DIGIT_GAP_CELLS = 3;
 const FIRST_DIGIT_COLUMN = 3;
 const FIRST_DIGIT_ROW = 7;
@@ -81,7 +77,7 @@ function blockRect(cell: GridCell, fill: string, extraAttributes = ""): string {
   return `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${BLOCK_CORNER_RADIUS_PX}" fill="${fill}"${extraAttributes}/>`;
 }
 
-/** Grid cells forming "42", shared by both SVG versions. */
+// cells of the "42", used by both svg versions
 function goldCellsOf42(): GridCell[] {
   const secondDigitColumn = FIRST_DIGIT_COLUMN + DIGIT_FOUR[0].length + DIGIT_GAP_CELLS;
   return [
@@ -94,7 +90,7 @@ function buildSvg(): string {
   const goldCells = goldCellsOf42();
   const goldCellKeys = new Set(goldCells.map((cell) => `${cell.column},${cell.row}`));
 
-  // Every grid position not part of "42" is drawn as a dim, empty block.
+  // all the other cells are dark empty blocks
   const emptyBlocks: string[] = [];
   for (let row = 0; row < GRID_CELLS_PER_SIDE; row++) {
     for (let column = 0; column < GRID_CELLS_PER_SIDE; column++) {
@@ -131,19 +127,14 @@ function buildSvg(): string {
 `;
 }
 
-/**
- * Same artwork in ~1.5 KB, small enough to store on-chain (gas is paid per
- * byte). Instead of 625 separate squares, one repeating pattern draws every
- * empty block, and a second pattern of gold blocks fills a path made of one
- * rectangle per horizontal run of "42" cells. Single quotes only, so it can
- * be embedded in a JSON string without escaping, and fractions instead of
- * "%" values, so only "#" needs encoding inside a data: URI.
- */
+// Same image but very small (~1.5 KB) so it's cheap to store on-chain.
+// Instead of 625 squares we use repeating patterns.
+// Only single quotes and no "%" so it fits easily in the JSON / data: uri.
 function buildCompactSvg(): string {
   const goldCellKeys = new Set(goldCellsOf42().map((cell) => `${cell.column},${cell.row}`));
   const blockSize = CELL_SIZE_PX - 2 * BLOCK_INSET_PX;
 
-  // One "M x y h w v h h -w z" rectangle per horizontal run of gold cells.
+  // one rectangle for each line of gold blocks next to each other
   const runRectangles: string[] = [];
   for (let row = 0; row < GRID_CELLS_PER_SIDE; row++) {
     let column = 0;
@@ -167,7 +158,7 @@ function buildCompactSvg(): string {
     `<pattern id='${id}' width='${CELL_SIZE_PX}' height='${CELL_SIZE_PX}' patternUnits='userSpaceOnUse'>${tileBlock(fill)}</pattern>`;
 
   return [
-    // width/height give wallets an intrinsic size (otherwise often 150px).
+    // width/height so wallets don't show it tiny
     `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${CANVAS_SIZE_PX} ${CANVAS_SIZE_PX}' width='${CANVAS_SIZE_PX}' height='${CANVAS_SIZE_PX}'>`,
     "<defs>",
     "<radialGradient id='b' cx='.5' cy='.45' r='.75'><stop offset='0' stop-color='#1a2350'/><stop offset='1' stop-color='#070a17'/></radialGradient>",

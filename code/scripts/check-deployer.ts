@@ -1,7 +1,7 @@
-// Prints the deployer address and its BSC Testnet balance, so you can confirm
-// the wallet is funded with test tBNB before deploying.
+// Shows the wallet address and how much tBNB it has.
+// Run it before deploying to be sure the wallet has some test money.
 //
-// Usage: npm run check-deployer
+// npm run check-deployer
 import { network } from "hardhat";
 
 const { ethers, networkName } = await network.getOrCreate();
@@ -15,8 +15,8 @@ console.log(`Network:  ${networkName} (chain ID ${chainId})`);
 console.log(`Deployer: ${deployerAddress}`);
 console.log(`Balance:  ${ethers.formatEther(balanceInWei)} tBNB`);
 
-// DEPLOYER_ADDRESS in .env is what you paste into faucets; warn if it does
-// not belong to the private key, since funds would go to the wrong wallet.
+// make sure the address in .env really matches the private key,
+// otherwise the faucet money goes to the wrong wallet
 const expectedDeployerAddress = process.env.DEPLOYER_ADDRESS;
 if (expectedDeployerAddress && expectedDeployerAddress.toLowerCase() !== deployerAddress.toLowerCase()) {
   console.log(`WARNING: DEPLOYER_ADDRESS in .env (${expectedDeployerAddress}) does not match the private key.`);

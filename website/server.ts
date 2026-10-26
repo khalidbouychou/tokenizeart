@@ -1,13 +1,11 @@
-// Local web server for the minting website (bonus part).
+// Small local server for the minting website (bonus).
 //
-// Serves the static page, the ethers browser bundle from node_modules (no
-// CDN), and /config.json built from deployment/bscTestnet.json, so the page
-// always targets the contract that was actually deployed.
+// It serves the page, ethers from node_modules, and /config.json
+// made from deployment/bscTestnet.json (so the site uses our real contract).
 //
-// No private key or API key is ever sent to the browser: transactions are
-// signed by the visitor's own wallet (MetaMask).
+// No private key is sent to the browser, MetaMask signs the transactions.
 //
-// Usage (from code/): npm run website   → http://127.0.0.1:8042
+// from code/: npm run website   → http://127.0.0.1:8042
 import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
@@ -19,8 +17,7 @@ const repositoryRoot = path.join(websiteDirectory, "..");
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.SITE_PORT ?? 8042);
 
-// Public settings only. SITE_* variables exist so the site can be tested
-// against a local Hardhat node; by default it targets BSC Testnet.
+// public settings only. SITE_* are used to test with a local hardhat node
 const siteConfig = {
   chainId: Number(process.env.SITE_CHAIN_ID ?? deploymentRecord.chainId),
   chainName: process.env.SITE_CHAIN_NAME ?? "BNB Smart Chain Testnet",
@@ -31,7 +28,7 @@ const siteConfig = {
   defaultMetadataUri: mintRecord.metadataURI,
 };
 
-// Explicit allow-list: only these files can be requested.
+// only these files can be opened, nothing else
 const routes: Record<string, { filePath: string; contentType: string }> = {
   "/": { filePath: path.join(websiteDirectory, "index.html"), contentType: "text/html; charset=utf-8" },
   "/app.js": { filePath: path.join(websiteDirectory, "app.js"), contentType: "text/javascript; charset=utf-8" },

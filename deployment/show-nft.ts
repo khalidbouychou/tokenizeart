@@ -1,13 +1,12 @@
-// Shows a minted NFT straight from the blockchain and IPFS: who owns it
-// (ownerOf), its metadata (tokenURI), and whether its image loads. Handles
-// both IPFS tokens and fully on-chain tokens (data: URIs).
+// Shows an NFT: who owns it (ownerOf), its metadata (tokenURI)
+// and checks that the image loads. Works for IPFS and on-chain NFTs.
 //
-// Read-only: sends no transaction, costs nothing, and needs no private key,
-// so anyone (e.g. an evaluator) can run it.
+// It only reads, no transaction, no private key needed,
+// so anyone can run it.
 //
-// Usage (from code/): npm run show-nft            → token 0
-//                     TOKEN_ID=3 npm run show-nft  → another token
-//   CONTRACT_ADDRESS (optional) reads another deployment of the contract.
+// from code/: npm run show-nft            → token 0
+//             TOKEN_ID=2 npm run show-nft  → another token
+// CONTRACT_ADDRESS=... to read another copy of the contract
 import { existsSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -19,7 +18,7 @@ if (existsSync(envFilePath)) {
   process.loadEnvFile(envFilePath);
 }
 
-// Public BSC Testnet endpoint, used when code/.env does not set one.
+// public testnet RPC, used if there is no .env
 const DEFAULT_BSC_TESTNET_RPC_URL = "https://data-seed-prebsc-1-s1.bnbchain.org:8545";
 const IPFS_GATEWAY_URLS = [
   "https://gateway.pinata.cloud/ipfs",
@@ -28,7 +27,7 @@ const IPFS_GATEWAY_URLS = [
 ];
 const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 
-// Only the read functions this script calls.
+// only the functions we read
 const TOKENIZE_ART_READ_ABI = [
   "function name() view returns (string)",
   "function symbol() view returns (string)",
@@ -44,11 +43,8 @@ type NftMetadata = {
   attributes?: { trait_type: string; value: string }[];
 };
 
-/**
- * Loads a token URI or image URI: either an on-chain data: URI (decoded
- * locally, base64 or URL-encoded) or an ipfs:// URI (fetched through the
- * first public gateway that answers).
- */
+// gets the content of a uri:
+// data: uri → decoded here, ipfs:// → downloaded from a gateway
 async function loadUri(uri: string): Promise<{ bytes: Buffer; source: string }> {
   const dataUriMatch = /^data:([^,]*?)(;base64)?,(.*)$/s.exec(uri);
   if (dataUriMatch) {
@@ -62,7 +58,7 @@ async function loadUri(uri: string): Promise<{ bytes: Buffer; source: string }> 
   return fetchFromIpfs(uri);
 }
 
-/** Fetches an ipfs:// URI through the first public gateway that answers. */
+// downloads an ipfs:// link from the first gateway that works
 async function fetchFromIpfs(ipfsUri: string): Promise<{ bytes: Buffer; source: string }> {
   const contentPath = ipfsUri.replace(/^ipfs:\/\//, "");
   for (const gatewayBaseUrl of IPFS_GATEWAY_URLS) {
@@ -73,7 +69,7 @@ async function fetchFromIpfs(ipfsUri: string): Promise<{ bytes: Buffer; source: 
         return { bytes: Buffer.from(await response.arrayBuffer()), source: gatewayUrl };
       }
     } catch {
-      // Try the next gateway.
+      // try the next one
     }
   }
   throw new Error(`No public IPFS gateway could serve ${ipfsUri}`);
@@ -90,7 +86,7 @@ console.log(`Contract:   ${contractAddress}`);
 console.log(`Collection: ${await tokenizeArt.name()} (${await tokenizeArt.symbol()})`);
 console.log(`Token ID:   ${tokenId}`);
 
-// ownerOf reverts (ERC721NonexistentToken) for a token that was never minted.
+// ownerOf fails if the token doesn't exist
 let ownerAddress: string;
 try {
   ownerAddress = await tokenizeArt.ownerOf(tokenId);
@@ -105,7 +101,7 @@ if (yourWalletAddress) {
   console.log(`            ${ownedByYou ? "= your wallet (DEPLOYER_ADDRESS)" : "≠ your wallet (DEPLOYER_ADDRESS)"}`);
 }
 
-/** Long on-chain data: URIs are shortened for display. */
+// data: uris are long, so we cut them when printing
 function shortenUri(uri: string): string {
   return uri.length > 90 ? `${uri.slice(0, 60)}… (${uri.length} bytes)` : uri;
 }
@@ -134,7 +130,7 @@ console.log(`Loaded:     ${imageDownload.bytes.length} bytes, ${imageKind}`);
 if (imageDownload.source.startsWith("http")) {
   console.log(`Open it:    ${imageDownload.source}`);
 } else {
-  // On-chain image: save a copy so it can be opened in a browser.
+  // on-chain image: save it to a file so you can open it
   const savedImagePath = path.join(tmpdir(), `tokenize-art-42-token-${tokenId}.${isPng ? "png" : "svg"}`);
   writeFileSync(savedImagePath, imageDownload.bytes);
   console.log(`Open it:    ${savedImagePath} (decoded from the chain)`);

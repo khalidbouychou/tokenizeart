@@ -1,17 +1,14 @@
-// Uploads one file to public IPFS through Pinata, then downloads it back from
-// a public gateway to prove anyone can retrieve it.
+// Uploads a file to IPFS with Pinata, then downloads it again
+// to check that anyone can get it.
 //
-// Needs PINATA_JWT in code/.env (Pinata dashboard → API Keys → New Key).
+// You need PINATA_JWT in code/.env
 //
-// Usage: npm run upload-to-ipfs -- <path/to/file>
-//   e.g. npm run upload-to-ipfs -- art/tokenize-art-42.png
+// npm run upload-to-ipfs -- art/tokenize-art-42.png
 import { existsSync, openAsBlob, readFileSync } from "node:fs";
 import path from "node:path";
 
 const PINATA_UPLOAD_URL = "https://uploads.pinata.cloud/v3/files";
-// Public gateways tried in order; any one returning the exact file proves it
-// is publicly retrievable. Several are listed because public gateways often
-// rate-limit (HTTP 429).
+// we try more than one gateway because they often block us (HTTP 429)
 const PUBLIC_GATEWAY_URLS = [
   "https://gateway.pinata.cloud/ipfs",
   "https://ipfs.io/ipfs",
@@ -39,7 +36,7 @@ const fileName = path.basename(filePathArgument);
 const uploadForm = new FormData();
 uploadForm.append("file", await openAsBlob(filePathArgument), fileName);
 uploadForm.append("name", fileName);
-// Pinata v3 uploads are private unless the public network is requested.
+// without this, pinata keeps the file private
 uploadForm.append("network", "public");
 
 const uploadResponse = await fetch(PINATA_UPLOAD_URL, {
@@ -61,7 +58,7 @@ console.log(`CID:         ${contentId}`);
 console.log(`IPFS URI:    ipfs://${contentId}`);
 console.log(`Gateway URL: ${PUBLIC_GATEWAY_URLS[0]}/${contentId}`);
 
-// Gateways can take a little while to find new content, so retry each round.
+// a new file can take some time to show up, so we retry a few times
 const localFileBytes = readFileSync(filePathArgument);
 const MAX_GATEWAY_ROUNDS = 3;
 const SECONDS_BETWEEN_ROUNDS = 10;

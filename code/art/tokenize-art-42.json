@@ -1,0 +1,12 @@
+{
+  "name": "42 Genesis Blocks",
+  "description": "The number 42 built from glowing gold blocks on a dark grid of empty blocks: a genesis block for 42, minted on BNB Smart Chain Testnet as part of the 42 TokenizeArt project. Artist: khbouych.",
+  "image": "ipfs://bafybeicdnsg3gsn5hillr3x7dbjarbnjrkxk7zrfygkdeehllwu2nvvu7e",
+  "artist": "khbouych",
+  "attributes": [
+    { "trait_type": "Artist", "value": "khbouych" },
+    { "trait_type": "Number", "value": "42" },
+    { "trait_type": "Style", "value": "Block pixel" },
+    { "trait_type": "Network", "value": "BSC Testnet" }
+  ]
+}

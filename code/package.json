@@ -8,6 +8,7 @@
     "build": "hardhat build",
     "test": "hardhat test",
     "generate-art": "node scripts/generate-art.ts",
+    "upload-to-ipfs": "node scripts/upload-to-ipfs.ts",
     "create-wallet": "node scripts/create-wallet.ts",
     "check-deployer": "hardhat run scripts/check-deployer.ts --network bscTestnet"
   },

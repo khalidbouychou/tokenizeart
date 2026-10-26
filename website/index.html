@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>42 Genesis Blocks: Mint</title>
+  <link rel="icon" href="/favicon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">42</span>
+      <div>
+        <h1 id="collection-name">42 Genesis Blocks</h1>
+        <p class="subtitle"><span id="collection-symbol">GB42</span> · BEP-721 on <span id="network-name">BSC Testnet</span></p>
+      </div>
+    </div>
+    <button id="connect-button" class="button button-primary" type="button">Connect wallet</button>
+  </header>
+
+  <main>
+    <section class="panel" aria-labelledby="contract-heading">
+      <h2 id="contract-heading">Contract</h2>
+      <dl class="facts">
+        <div><dt>Address</dt><dd><a id="contract-link" target="_blank" rel="noopener">…</a></dd></div>
+        <div><dt>Owner (only minter)</dt><dd id="contract-owner">…</dd></div>
+        <div><dt>Minted</dt><dd id="total-minted">…</dd></div>
+        <div><dt>Your wallet</dt><dd id="wallet-status">Not connected</dd></div>
+      </dl>
+    </section>
+
+    <section class="panel" aria-labelledby="mint-heading">
+      <h2 id="mint-heading">Mint an NFT</h2>
+      <p id="mint-permission" class="notice">Connect the owner wallet to mint.</p>
+      <form id="mint-form" novalidate>
+        <label for="recipient-input">Recipient address</label>
+        <input id="recipient-input" name="recipient" type="text" spellcheck="false" autocomplete="off" placeholder="0x…">
+
+        <label for="metadata-input">Metadata URI (IPFS)</label>
+        <input id="metadata-input" name="metadataUri" type="text" spellcheck="false" autocomplete="off" placeholder="ipfs://…">
+
+        <div id="metadata-preview" class="preview" hidden>
+          <img id="preview-image" alt="">
+          <div>
+            <p class="preview-name" id="preview-name"></p>
+            <p class="preview-artist" id="preview-artist"></p>
+          </div>
+        </div>
+
+        <button id="mint-button" class="button button-primary" type="submit" disabled>Mint</button>
+      </form>
+      <p id="mint-status" class="status" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="panel" aria-labelledby="gallery-heading">
+      <h2 id="gallery-heading">Minted tokens</h2>
+      <p id="gallery-status" class="muted">Loading from the blockchain…</p>
+      <ul id="gallery" class="gallery"></ul>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    Testnet only: tBNB has no value. Artist: khbouych · 42 TokenizeArt
+  </footer>
+
+  <script src="/vendor/ethers.umd.min.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

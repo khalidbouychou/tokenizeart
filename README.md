@@ -31,6 +31,15 @@ npm run show-nft       # prints ownerOf, tokenURI, metadata, and checks the imag
 npm run demo           # runs the 15 tests, then show-nft
 ```
 
+## Minting website (bonus)
+
+```bash
+cd code
+npm run website        # then open http://127.0.0.1:8042
+```
+
+A graphical interface for the contract. Anyone can see the collection and every minted token (image, name, artist, owner), read live from BSC Testnet and IPFS. The owner can connect MetaMask and mint through a form, with a live preview of the metadata. The page switches the wallet to BSC Testnet automatically, simulates each mint before signing so a failing one costs no gas, and keeps the form disabled for any account other than the owner. No private key ever reaches the page: the visitor's own wallet signs. Token [#1](https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=1) was minted through this website with MetaMask. Details in the [usage guide](documentation/usage.md#6-minting-website-bonus).
+
 ## Repository layout
 
 | Folder | Contents |
@@ -38,6 +47,7 @@ npm run demo           # runs the 15 tests, then show-nft
 | [`code/`](code/) | The code that creates the NFT: the Solidity contract, its tests, the artwork generator and the IPFS upload script (Hardhat 3 project) |
 | [`deployment/`](deployment/) | Everything needed to deploy and mint: deploy, mint and display scripts, plus the deployment and mint records |
 | [`documentation/`](documentation/) | How it works, how to use it, the security review, the whitepaper and the original subject (PRD) |
+| [`website/`](website/) | Bonus: the minting website (static page plus a small local server) |
 
 ## Choices and reasons
 

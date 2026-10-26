@@ -51,6 +51,7 @@ Live state at the time of this review: the owner is the deployer wallet, there i
 - The deployer private key, the RPC URL, the wallet address and the Pinata API credentials live only in `code/.env`. That file is git-ignored and readable only by its owner (permissions `600`). `code/.env.example` lists the variable names with empty values.
 - **History check:** every value in `code/.env` was searched for across the full git history (`git log --all -p`). The private key, wallet address and all Pinata credentials appear **0 times**. Only the public BSC Testnet RPC URL appears, which is not a secret. No `.env` file was ever committed.
 - The deployer is a fresh wallet created only for this project (`npm run create-wallet`), never used with real funds.
+- **Minting website (bonus):** the local server only serves an allow-list of files and never reads `code/.env`. Requests for anything else, including `/.env`, get 404. Transactions are signed by the visitor's own wallet. The page inserts on-chain and IPFS data as text only (no HTML injection), and the contract's `onlyOwner` check still applies whatever the page does.
 
 ## 5. Automated checks
 

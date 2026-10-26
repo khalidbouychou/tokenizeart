@@ -4,7 +4,7 @@
 
 ## Abstract
 
-**42 Genesis Blocks** is a single-edition digital artwork issued as a BEP-721 non-fungible token on BNB Smart Chain Testnet. The artwork renders the number 42 as gold blocks on a grid of empty blocks, a visual nod to the blocks that make up a blockchain. Ownership is recorded on-chain, and the artwork and its description live on IPFS, linked by content hashes, so the token, its metadata and its image form a chain that cannot be silently altered.
+**42 Genesis Blocks** is a digital artwork issued as a BEP-721 non-fungible token on BNB Smart Chain Testnet. The artwork renders the number 42 as gold blocks on a grid of empty blocks, a visual nod to the blocks that make up a blockchain. Ownership is recorded on-chain, and the artwork and its description live on IPFS, linked by content hashes, so the token, its metadata and its image form a chain that cannot be silently altered.
 
 ## 1. Concept
 
@@ -24,7 +24,7 @@ The design follows three rules:
 | Network | BNB Smart Chain Testnet, chain ID 97 |
 | Contract | `TokenizeArt42` at `0xB81510a9b38443525808b3A762a68d5e9070a68f` |
 | Collection | 42 Genesis Blocks (`GB42`) |
-| Edition | 1 token minted (ID 0) |
+| Edition | 2 tokens minted: ID 0 (mint script, owner wallet) and ID 1 (minting website), both with the same artwork |
 | Metadata | `ipfs://bafkreiec7ypupjglneppqu2jfhajmzhmfcr7xehukubdtslamrfki4tfum` |
 | Image | `ipfs://bafybeicdnsg3gsn5hillr3x7dbjarbnjrkxk7zrfygkdeehllwu2nvvu7e` (PNG, 2000×2000) |
 

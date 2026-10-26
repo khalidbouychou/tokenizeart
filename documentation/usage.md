@@ -111,6 +111,27 @@ A minimal sequence that shows everything working. Steps 1 and 2 together: `npm r
 
 Never call `renounceOwnership()` during a demo: it removes the owner forever, and minting becomes impossible.
 
+## 6. Minting website (bonus)
+
+```bash
+cd code
+npm run website        # serves http://127.0.0.1:8042 (SITE_PORT to change)
+```
+
+Open http://127.0.0.1:8042 in a browser with MetaMask installed.
+
+- **Without a wallet:** the page shows the contract, its owner, the number minted, and a gallery of every token (image, name, artist, owner, explorer link), read live from BSC Testnet and IPFS.
+- **Connect wallet:** MetaMask asks for permission and is switched to BSC Testnet, adding the network if needed.
+- **Minting (owner wallet only):**
+  1. The recipient defaults to your own address, and the metadata URI defaults to the "42 Genesis Blocks" metadata. A preview shows the name, artist and image the URI points to.
+  2. Click **Mint**. The page validates the inputs and simulates the mint first, so a failing mint costs no gas, then MetaMask asks you to confirm.
+  3. Once confirmed, the page shows the new token ID with a transaction link, and the gallery refreshes.
+- **Any other wallet:** the form stays disabled and explains that only the owner can mint, matching the contract's rule.
+
+To mint with the owner wallet in MetaMask, import its key there (MetaMask → Add account → Import account) from `code/.env`. Only do this on your own machine.
+
+How it is built: `website/server.ts` serves an allow-listed set of files: the page, the ethers browser bundle from `node_modules` (no CDN), and `/config.json`, built from `deployment/bscTestnet.json`. It never sends anything from `code/.env` to the browser. The page (`website/app.js`) inserts on-chain and IPFS data with `textContent` only, and loads images only from `ipfs://` URIs through the gateway.
+
 ## Troubleshooting
 
 | Message | Fix |

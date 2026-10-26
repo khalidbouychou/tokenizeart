@@ -1,0 +1,11 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "contractName": "TokenizeArt42",
+  "collectionName": "42 Genesis Blocks",
+  "collectionSymbol": "GB42",
+  "contractAddress": "0xB81510a9b38443525808b3A762a68d5e9070a68f",
+  "deploymentTransactionHash": "0x436cc64b304f7cd3ac0d6081d78ba5eb74f56d03fadc2d15e43080b65e1feacd",
+  "blockNumber": 139097142,
+  "explorerUrl": "https://testnet.b42 Genesis Blocksscscan.com/address/0xB81510a9b38443525808b3A762a68d5e9070a68f"
+}

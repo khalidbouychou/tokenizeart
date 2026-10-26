@@ -1,0 +1,8 @@
+{
+  "name": "tokenize-art",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "code"
+  ]
+}

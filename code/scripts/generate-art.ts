@@ -5,8 +5,9 @@
 // renders identically everywhere and stays legible at thumbnail size.
 //
 // Outputs (in code/art/):
-//   tokenize-art-42.svg  source artwork (also reusable for on-chain storage)
-//   tokenize-art-42.png  2000x2000 render, the file uploaded to IPFS
+//   tokenize-art-42.svg          source artwork
+//   tokenize-art-42.png          2000x2000 render, the file uploaded to IPFS
+//   tokenize-art-42-onchain.svg  same artwork in ~1.5 KB, stored on-chain
 //
 // Usage: npm run generate-art
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -80,12 +81,17 @@ function blockRect(cell: GridCell, fill: string, extraAttributes = ""): string {
   return `<rect x="${x}" y="${y}" width="${size}" height="${size}" rx="${BLOCK_CORNER_RADIUS_PX}" fill="${fill}"${extraAttributes}/>`;
 }
 
-function buildSvg(): string {
+/** Grid cells forming "42", shared by both SVG versions. */
+function goldCellsOf42(): GridCell[] {
   const secondDigitColumn = FIRST_DIGIT_COLUMN + DIGIT_FOUR[0].length + DIGIT_GAP_CELLS;
-  const goldCells = [
+  return [
     ...bitmapToCells(DIGIT_FOUR, FIRST_DIGIT_COLUMN, FIRST_DIGIT_ROW),
     ...bitmapToCells(DIGIT_TWO, secondDigitColumn, FIRST_DIGIT_ROW),
   ];
+}
+
+function buildSvg(): string {
+  const goldCells = goldCellsOf42();
   const goldCellKeys = new Set(goldCells.map((cell) => `${cell.column},${cell.row}`));
 
   // Every grid position not part of "42" is drawn as a dim, empty block.
@@ -125,13 +131,67 @@ function buildSvg(): string {
 `;
 }
 
+/**
+ * Same artwork in ~1.5 KB, small enough to store on-chain (gas is paid per
+ * byte). Instead of 625 separate squares, one repeating pattern draws every
+ * empty block, and a second pattern of gold blocks fills a path made of one
+ * rectangle per horizontal run of "42" cells. Single quotes only, so it can
+ * be embedded in a JSON string without escaping, and fractions instead of
+ * "%" values, so only "#" needs encoding inside a data: URI.
+ */
+function buildCompactSvg(): string {
+  const goldCellKeys = new Set(goldCellsOf42().map((cell) => `${cell.column},${cell.row}`));
+  const blockSize = CELL_SIZE_PX - 2 * BLOCK_INSET_PX;
+
+  // One "M x y h w v h h -w z" rectangle per horizontal run of gold cells.
+  const runRectangles: string[] = [];
+  for (let row = 0; row < GRID_CELLS_PER_SIDE; row++) {
+    let column = 0;
+    while (column < GRID_CELLS_PER_SIDE) {
+      if (!goldCellKeys.has(`${column},${row}`)) {
+        column++;
+        continue;
+      }
+      const runStartColumn = column;
+      while (goldCellKeys.has(`${column},${row}`)) {
+        column++;
+      }
+      const runWidth = (column - runStartColumn) * CELL_SIZE_PX;
+      runRectangles.push(`M${runStartColumn * CELL_SIZE_PX} ${row * CELL_SIZE_PX}h${runWidth}v${CELL_SIZE_PX}h-${runWidth}z`);
+    }
+  }
+
+  const tileBlock = (fill: string) =>
+    `<rect x='${BLOCK_INSET_PX}' y='${BLOCK_INSET_PX}' width='${blockSize}' height='${blockSize}' rx='${BLOCK_CORNER_RADIUS_PX}' fill='${fill}'/>`;
+  const tilePattern = (id: string, fill: string) =>
+    `<pattern id='${id}' width='${CELL_SIZE_PX}' height='${CELL_SIZE_PX}' patternUnits='userSpaceOnUse'>${tileBlock(fill)}</pattern>`;
+
+  return [
+    // width/height give wallets an intrinsic size (otherwise often 150px).
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${CANVAS_SIZE_PX} ${CANVAS_SIZE_PX}' width='${CANVAS_SIZE_PX}' height='${CANVAS_SIZE_PX}'>`,
+    "<defs>",
+    "<radialGradient id='b' cx='.5' cy='.45' r='.75'><stop offset='0' stop-color='#1a2350'/><stop offset='1' stop-color='#070a17'/></radialGradient>",
+    "<linearGradient id='g' x2='0' y2='1'><stop offset='0' stop-color='#ffe27a'/><stop offset='.55' stop-color='#f0b90b'/><stop offset='1' stop-color='#c98a00'/></linearGradient>",
+    tilePattern("e", "#161d3a"),
+    tilePattern("o", "url(#g)"),
+    "<filter id='l' x='-.5' y='-.5' width='2' height='2'><feGaussianBlur stdDeviation='6'/><feColorMatrix values='1 0 0 0 0 0 .75 0 0 0 0 0 0 0 0 0 0 0 .55 0'/><feMerge><feMergeNode/><feMergeNode in='SourceGraphic'/></feMerge></filter>",
+    "</defs>",
+    `<rect width='${CANVAS_SIZE_PX}' height='${CANVAS_SIZE_PX}' fill='url(#b)'/>`,
+    `<rect width='${CANVAS_SIZE_PX}' height='${CANVAS_SIZE_PX}' fill='url(#e)'/>`,
+    `<path d='${runRectangles.join("")}' fill='url(#o)' filter='url(#l)'/>`,
+    "</svg>",
+  ].join("");
+}
+
 const artDirectory = path.join(import.meta.dirname, "..", "art");
 const svgPath = path.join(artDirectory, "tokenize-art-42.svg");
 const pngPath = path.join(artDirectory, "tokenize-art-42.png");
+const onChainSvgPath = path.join(artDirectory, "tokenize-art-42-onchain.svg");
 
 mkdirSync(artDirectory, { recursive: true });
 const svgSource = buildSvg();
 writeFileSync(svgPath, svgSource);
+writeFileSync(onChainSvgPath, buildCompactSvg());
 
 const renderDensityDpi = (72 * PNG_SIZE_PX) / CANVAS_SIZE_PX;
 await sharp(Buffer.from(svgSource), { density: renderDensityDpi })
@@ -141,3 +201,4 @@ await sharp(Buffer.from(svgSource), { density: renderDensityDpi })
 
 console.log(`Wrote ${svgPath}`);
 console.log(`Wrote ${pngPath}`);
+console.log(`Wrote ${onChainSvgPath}`);

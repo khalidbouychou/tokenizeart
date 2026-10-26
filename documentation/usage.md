@@ -111,7 +111,27 @@ A minimal sequence that shows everything working. Steps 1 and 2 together: `npm r
 
 Never call `renounceOwnership()` during a demo: it removes the owner forever, and minting becomes impossible.
 
-## 6. Minting website (bonus)
+## 6. On-chain token (bonus)
+
+Token #2 stores its metadata and image entirely in contract storage. To inspect it:
+
+```bash
+TOKEN_ID=2 npm run show-nft
+```
+
+It decodes the `data:` URI returned by `tokenURI(2)`, prints the metadata, and saves the decoded SVG to a temporary file you can open in a browser.
+
+How it was minted:
+
+```bash
+npm run generate-art                 # also writes art/tokenize-art-42-onchain.svg (~1.6 KB, same look)
+npm run mint-onchain                 # estimates gas and cost only; sends nothing
+MINT=yes npm run mint-onchain        # mints, then writes deployment/bscTestnet-mint-onchain.json
+```
+
+The script refuses to run if your balance is below the estimate plus 20%, if the record already exists, or if a token with the same on-chain URI already exists. The token URI is built in `deployment/onchain-metadata.ts`. The SVG is embedded as UTF-8 (only `#` is escaped), which is ~25% smaller than base64.
+
+## 7. Minting website (bonus)
 
 ```bash
 cd code

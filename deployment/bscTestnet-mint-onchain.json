@@ -1,0 +1,12 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "contractAddress": "0xB81510a9b38443525808b3A762a68d5e9070a68f",
+  "tokenId": 2,
+  "storage": "on-chain (data: URI in contract storage, no IPFS)",
+  "tokenUriBytes": 2821,
+  "gasUsed": "2103650",
+  "mintTransactionHash": "0x036fc76ccb273b510de0742729ae0c726e060667339bca0fc740610c5ea1eff7",
+  "blockNumber": 139106592,
+  "explorerUrl": "https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=2"
+}

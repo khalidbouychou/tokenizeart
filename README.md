@@ -31,6 +31,15 @@ npm run show-nft       # prints ownerOf, tokenURI, metadata, and checks the imag
 npm run demo           # runs the 15 tests, then show-nft
 ```
 
+## On-chain token (bonus)
+
+Token [#2](https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=2), "42 Genesis Blocks (On-chain)", stores **both its metadata and its image in contract storage**, with no IPFS. The artwork was redrawn as a 1.6 KB SVG that looks identical: repeating patterns replace 625 separate squares. `tokenURI(2)` returns a `data:application/json;base64,…` URI whose `image` is a `data:image/svg+xml` URI. The mint cost ~2.1M gas (~0.00021 tBNB), about 15× less than storing the original 45 KB SVG. The existing contract was reused as is, since `safeMint` accepts any metadata URI. Record: [`deployment/bscTestnet-mint-onchain.json`](deployment/bscTestnet-mint-onchain.json).
+
+```bash
+cd code
+TOKEN_ID=2 npm run show-nft   # decodes metadata and image straight from the chain
+```
+
 ## Minting website (bonus)
 
 ```bash
@@ -38,7 +47,7 @@ cd code
 npm run website        # then open http://127.0.0.1:8042
 ```
 
-A graphical interface for the contract. Anyone can see the collection and every minted token (image, name, artist, owner), read live from BSC Testnet and IPFS. The owner can connect MetaMask and mint through a form, with a live preview of the metadata. The page switches the wallet to BSC Testnet automatically, simulates each mint before signing so a failing one costs no gas, and keeps the form disabled for any account other than the owner. No private key ever reaches the page: the visitor's own wallet signs. Token [#1](https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=1) was minted through this website with MetaMask. Details in the [usage guide](documentation/usage.md#6-minting-website-bonus).
+A graphical interface for the contract. Anyone can see the collection and every minted token (image, name, artist, owner), read live from BSC Testnet and IPFS. The owner can connect MetaMask and mint through a form, with a live preview of the metadata. The page switches the wallet to BSC Testnet automatically, simulates each mint before signing so a failing one costs no gas, and keeps the form disabled for any account other than the owner. No private key ever reaches the page: the visitor's own wallet signs. Token [#1](https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=1) was minted through this website with MetaMask. Details in the [usage guide](documentation/usage.md#7-minting-website-bonus).
 
 ## Repository layout
 

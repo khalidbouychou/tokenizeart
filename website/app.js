@@ -78,10 +78,39 @@ function ipfsToGatewayUrl(uri) {
   return `${siteConfig.ipfsGatewayUrl}/${uri.slice("ipfs://".length)}`;
 }
 
+/**
+ * Image source for an NFT: IPFS through the gateway, or an on-chain SVG/PNG
+ * data: URI used as-is (images in <img> cannot run scripts).
+ */
+function imageUriToSource(uri) {
+  if (typeof uri === "string" && /^data:image\/(svg\+xml|png)[;,]/.test(uri)) {
+    return uri;
+  }
+  return ipfsToGatewayUrl(uri);
+}
+
+/** Decodes an on-chain data:application/json URI (base64 or URL-encoded). */
+function decodeJsonDataUri(dataUri) {
+  const match = /^data:application\/json(;[^,]*)?,(.*)$/s.exec(dataUri);
+  if (!match) {
+    return null;
+  }
+  const [, parameters = "", payload] = match;
+  if (parameters.includes(";base64")) {
+    const bytes = Uint8Array.from(atob(payload), (character) => character.charCodeAt(0));
+    return JSON.parse(new TextDecoder().decode(bytes));
+  }
+  return JSON.parse(decodeURIComponent(payload));
+}
+
 async function fetchMetadata(metadataUri) {
+  const onChainMetadata = decodeJsonDataUri(metadataUri);
+  if (onChainMetadata) {
+    return onChainMetadata;
+  }
   const gatewayUrl = ipfsToGatewayUrl(metadataUri);
   if (!gatewayUrl) {
-    throw new Error("Metadata URI must start with ipfs://");
+    throw new Error("Metadata URI must start with ipfs:// or be an on-chain data: URI");
   }
   const response = await fetch(gatewayUrl);
   if (!response.ok) {
@@ -142,7 +171,7 @@ function buildTokenCard(tokenId, ownerAddress, metadata) {
   const image = document.createElement("img");
   image.loading = "lazy";
   image.alt = metadata?.name ?? `Token ${tokenId}`;
-  const imageUrl = ipfsToGatewayUrl(metadata?.image);
+  const imageUrl = imageUriToSource(metadata?.image);
   if (imageUrl) {
     image.src = imageUrl;
   }
@@ -304,7 +333,7 @@ async function previewMetadata() {
     }
     elements.previewName.textContent = metadata.name ?? "(no name)";
     elements.previewArtist.textContent = metadata.artist ? `by ${metadata.artist}` : "";
-    const imageUrl = ipfsToGatewayUrl(metadata.image);
+    const imageUrl = imageUriToSource(metadata.image);
     elements.previewImage.alt = metadata.name ?? "";
     if (imageUrl) {
       elements.previewImage.src = imageUrl;

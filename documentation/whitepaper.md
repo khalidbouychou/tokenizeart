@@ -24,7 +24,7 @@ The design follows three rules:
 | Network | BNB Smart Chain Testnet, chain ID 97 |
 | Contract | `TokenizeArt42` at `0xB81510a9b38443525808b3A762a68d5e9070a68f` |
 | Collection | 42 Genesis Blocks (`GB42`) |
-| Edition | 2 tokens minted: ID 0 (mint script, owner wallet) and ID 1 (minting website), both with the same artwork |
+| Edition | 3 tokens, same artwork: ID 0 (mint script, IPFS), ID 1 (minting website, IPFS), ID 2 (fully on-chain, no IPFS) |
 | Metadata | `ipfs://bafkreiec7ypupjglneppqu2jfhajmzhmfcr7xehukubdtslamrfki4tfum` |
 | Image | `ipfs://bafybeicdnsg3gsn5hillr3x7dbjarbnjrkxk7zrfygkdeehllwu2nvvu7e` (PNG, 2000×2000) |
 

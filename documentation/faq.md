@@ -22,7 +22,10 @@ About 0.00015 tBNB in total (deploy ~1.3M gas, mint ~120k gas, at ~0.1 gwei), al
 IPFS is a distributed file system where a file's address (its CID) is computed from its content. The same bytes always give the same CID, and different bytes always give a different one.
 
 **Why not store the image on the blockchain?**
-A 2000×2000 PNG (~720 KB) would cost a large amount of gas. Storing a short `ipfs://` URI on-chain gives the same tamper-evidence, because the CID is a hash of the content, at a tiny cost. (Full on-chain storage is listed as a bonus in the subject.)
+Both are done. Tokens #0 and #1 use IPFS: a 2000×2000 PNG (~720 KB) would cost a large amount of gas, while a short `ipfs://` URI gives the same tamper-evidence, because the CID is a hash of the content. Token #2 (bonus) is **fully on-chain**: the artwork was redrawn as a 1.6 KB SVG that looks identical, and the metadata plus the image are stored in contract storage as a `data:` URI. That cost ~2.1M gas (~0.00021 tBNB), versus ~31M gas for the original 45 KB SVG.
+
+**How does the on-chain token work without a new contract?**
+`safeMint` accepts any non-empty metadata URI. For token #2, the URI is `data:application/json;base64,…`. Decoded, it's the metadata JSON, whose `image` is `data:image/svg+xml;utf8,<svg …>`. `tokenURI(2)` returns all of it straight from contract storage, so the token depends on nothing outside the blockchain.
 
 **Can someone change the image behind the NFT?**
 No. The contract stores the metadata CID, and the metadata stores the image CID. Changing either file would change its CID, and there is no function to update `tokenURI` after minting, not even for the owner.

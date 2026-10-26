@@ -40,6 +40,8 @@ Live state at the time of this review: the owner is the deployer wallet, there i
 - `tokenURI` stores an `ipfs://<CID>` URI. A CID is a hash of the content, so the metadata and image cannot be swapped without the CID (and therefore the on-chain URI) changing. Tampering is detectable by anyone.
 - Availability depends on the files staying pinned on IPFS (Pinata). If they were ever unpinned, re-uploading the same files from `code/art/` restores them **at the same CID**, with no on-chain change needed.
 
+- **On-chain token (#2, bonus):** its metadata and image live in contract storage as a `data:` URI, so they need no pinning and are as permanent as the chain. Like every token, its URI has no setter. The website shows on-chain images only from `data:image/svg+xml` or `data:image/png`, through `<img>`, where an SVG cannot run scripts.
+
 ## 3. No real funds
 
 - The only live network configured in `code/hardhat.config.ts` is `bscTestnet`, pinned to chain ID 97. If the RPC URL ever points at another chain, Hardhat stops before doing anything. Tested by pointing it at BSC mainnet: `Error HHE708: Hardhat was set to use chain id "97", but connected to a chain with id "56"`. BSC mainnet is deliberately absent.

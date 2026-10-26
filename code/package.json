@@ -10,6 +10,7 @@
     "deploy": "hardhat run ../deployment/deploy.ts --network bscTestnet",
     "deploy:local": "hardhat run ../deployment/deploy.ts",
     "mint": "hardhat run ../deployment/mint.ts --network bscTestnet",
+    "demo": "hardhat test && node ../deployment/show-nft.ts",
     "show-nft": "node ../deployment/show-nft.ts",
     "generate-art": "node scripts/generate-art.ts",
     "upload-to-ipfs": "node scripts/upload-to-ipfs.ts",

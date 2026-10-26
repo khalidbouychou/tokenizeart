@@ -28,6 +28,7 @@ No wallet or private key needed:
 npm install            # at the repository root
 cd code
 npm run show-nft       # prints ownerOf, tokenURI, metadata, and checks the image
+npm run demo           # runs the 15 tests, then show-nft
 ```
 
 ## Repository layout
@@ -60,4 +61,5 @@ npm run show-nft       # prints ownerOf, tokenURI, metadata, and checks the imag
 - [Usage guide](documentation/usage.md): setup, every command, and a step-by-step demo
 - [Security review](documentation/security.md): roles, privileges, and checks performed
 - [Whitepaper](documentation/whitepaper.md): the NFT's concept, features and functionality
+- [FAQ](documentation/faq.md): common questions about the standard, IPFS, security and verification
 - [Subject / PRD](documentation/PRD.md): the original project requirements

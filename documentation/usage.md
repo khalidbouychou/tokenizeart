@@ -101,7 +101,7 @@ npx hardhat verify sourcify --network bscTestnet <contract-address> "42 Genesis 
 
 ## 5. Demo for the evaluation
 
-A minimal sequence that shows everything working:
+A minimal sequence that shows everything working. Steps 1 and 2 together: `npm run demo`.
 
 1. `npm test`: 15 passing tests, including "non-owner cannot mint" and "ownerOf returns the recipient".
 2. `npm run show-nft`: the live owner, metadata and image from BSC Testnet and IPFS.

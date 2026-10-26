@@ -1,3 +1,6 @@
+// Hardhat configuration: Solidity compiler settings, the local test chain,
+// and BSC Testnet (the only live network; BSC mainnet is deliberately absent
+// so real funds can never be used).
 import hardhatToolboxMochaEthersPlugin from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
 import { existsSync } from "node:fs";
 import path from "node:path";

@@ -1,0 +1,14 @@
+# Dependencies
+node_modules/
+
+# Secrets: private keys must never be committed
+.env
+.env.*
+!.env.example
+
+# Hardhat build output
+code/artifacts/
+code/cache/
+code/types/
+code/coverage/
+code/ignition/deployments/chain-31337/

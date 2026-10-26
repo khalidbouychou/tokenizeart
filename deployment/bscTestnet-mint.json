@@ -1,0 +1,10 @@
+{
+  "network": "BSC Testnet",
+  "chainId": 97,
+  "contractAddress": "0xB81510a9b38443525808b3A762a68d5e9070a68f",
+  "tokenId": 0,
+  "metadataURI": "ipfs://bafkreiec7ypupjglneppqu2jfhajmzhmfcr7xehukubdtslamrfki4tfum",
+  "mintTransactionHash": "0xdddb685300d23c2f462df4da330f1b7b6fa0851275a8ac4ed19fa54eb15695d2",
+  "blockNumber": 139097495,
+  "explorerUrl": "https://testnet.bscscan.com/token/0xB81510a9b38443525808b3A762a68d5e9070a68f?a=0"
+}
